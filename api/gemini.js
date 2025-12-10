@@ -1,3 +1,5 @@
+// /api/gemini.js
+
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports = async (req, res) => {
@@ -5,12 +7,12 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  try {
-    const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: "API key missing" });
-    }
+  const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "API key missing" });
+  }
 
+  try {
     const body =
       typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
@@ -21,16 +23,14 @@ module.exports = async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash"
-    });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const result = await model.generateContent(message);
-    const text = result.response.text();
+    const reply = result.response.text();
 
-    return res.status(200).json({ text });
-  } catch (e) {
-    console.error("Gemini error:", e);
+    return res.status(200).json({ reply });
+  } catch (error) {
+    console.error("Gemini error:", error);
     return res.status(500).json({ error: "Gemini failed" });
   }
 };
