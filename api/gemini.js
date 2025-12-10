@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const apiKey = process.env.GOOGLE_API_KEY;
+    const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: "API key missing" });
     }
@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
     const body =
       typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-    const { message } = body;
+    const { message } = body || {};
 
     if (!message) {
       return res.status(400).json({ error: "Message required" });
@@ -28,9 +28,9 @@ module.exports = async (req, res) => {
     const result = await model.generateContent(message);
     const text = result.response.text();
 
-    res.status(200).json({ text });
+    return res.status(200).json({ text });
   } catch (e) {
     console.error("Gemini error:", e);
-    res.status(500).json({ error: "Gemini failed" });
+    return res.status(500).json({ error: "Gemini failed" });
   }
 };
